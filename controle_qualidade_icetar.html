@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Qualidade – ICETAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark:  #1a2d4f;
+    --blue-mid:   #1e5fa8;
+    --blue-light: #4a90d9;
+    --blue-pale:  #dbeeff;
+    --red-acc:    #c0392b;
+    --red-light:  #fdecea;
+    --green-acc:  #1e7e4e;
+    --green-light:#e8f8ef;
+    --amber-acc:  #d97706;
+    --amber-light:#fff8e1;
+    --gray-100:   #f4f6fa;
+    --gray-200:   #e8ecf3;
+    --gray-400:   #a0abbe;
+    --gray-600:   #5c6b82;
+    --gray-800:   #2c3a50;
+    --white:      #ffffff;
+    --shadow-sm:  0 1px 4px rgba(26,45,79,.08);
+    --shadow-md:  0 4px 16px rgba(26,45,79,.12);
+    --radius:     10px;
+    --radius-sm:  6px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    background: var(--blue-dark);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 24px;
+  }
+  .header-logo { height: 52px; }
+  .header-titles { flex: 1; }
+  .header-titles h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: .5px;
+    line-height: 1.2;
+  }
+  .header-titles p {
+    font-size: 11px;
+    color: var(--blue-pale);
+    letter-spacing: .3px;
+    opacity: .8;
+  }
+  .header-badge {
+    background: var(--blue-mid);
+    border: 1px solid rgba(255,255,255,.15);
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 10px 24px;
+    position: sticky;
+    top: 80px;
+    z-index: 99;
+    box-shadow: var(--shadow-sm);
+  }
+  .status-bar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .status-bar-title { font-size: 12px; color: var(--gray-600); font-weight: 600; white-space: nowrap; }
+  .status-pills {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill { padding: 4px 12px; border-radius: 12px; display: flex; align-items: center; gap: 4px; }
+  .pill-apr { background: var(--green-light); color: var(--green-acc); }
+  .pill-rep { background: var(--red-light); color: var(--red-acc); }
+  .pill-obs { background: var(--amber-light); color: var(--amber-acc); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  /* ── SECTION CARD ── */
+  .section-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+  }
+  .section-head {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-head:hover { filter: brightness(1.05); }
+  .section-num {
+    background: rgba(255,255,255,.18);
+    color: var(--white);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .section-toggle {
+    color: rgba(255,255,255,.7);
+    font-size: 18px;
+    transition: transform .3s;
+    flex-shrink: 0;
+  }
+  .section-toggle.open { transform: rotate(180deg); }
+  .section-body {
+    padding: 22px;
+    display: none;
+  }
+  .section-body.open { display: block; }
+
+  /* ── FORM GRID ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+  .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-full { grid-column: 1 / -1; }
+
+  /* ── FIELD ── */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .field input, .field select, .field textarea {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13.5px;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(30,95,168,.1);
+  }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .field input.error { border-color: var(--red-acc); background: var(--red-light); }
+
+  /* ── RADIO TOGGLE ── */
+  .radio-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-top: 2px; }
+  .radio-btn { display: none; }
+  .radio-label {
+    padding: 7px 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .radio-btn:checked + .radio-label { border-color: transparent; color: var(--white); }
+  .radio-btn[value="SIM"]:checked + .radio-label,
+  .radio-btn[value="APR"]:checked + .radio-label { background: var(--green-acc); }
+  .radio-btn[value="NAO"]:checked + .radio-label,
+  .radio-btn[value="REP"]:checked + .radio-label { background: var(--red-acc); }
+  .radio-btn[value="OBS"]:checked + .radio-label { background: var(--amber-acc); }
+
+  /* ── INSPECTION TABLE ── */
+  .insp-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; table-layout: fixed; }
+  .insp-table thead th {
+    background: var(--gray-100);
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    text-align: left;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .insp-row { background: var(--white); transition: background .2s; }
+  .insp-row:hover { background: var(--gray-100); }
+  .insp-row.status-apr { background: var(--green-light) !important; border-left: 4px solid var(--green-acc); }
+  .insp-row.status-rep { background: var(--red-light) !important; border-left: 4px solid var(--red-acc); }
+  .insp-row.status-obs { background: var(--amber-light) !important; border-left: 4px solid var(--amber-acc); }
+  .insp-row td {
+    padding: 10px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .item-name { font-weight: 600; font-size: 13px; color: var(--gray-800); }
+  .item-name small { display: block; font-size: 11px; color: var(--gray-400); font-weight: 400; }
+  .insp-input {
+    width: 100%;
+    border: 1.5px solid var(--gray-400);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    color: var(--gray-800);
+    outline: none;
+    background: var(--white);
+    transition: border-color .2s;
+  }
+  .insp-input:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 2px rgba(30,95,168,.1); }
+  .status-btns { display: flex; gap: 6px; }
+  .s-btn { display: none; }
+  .s-lbl {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all .15s;
+    letter-spacing: .3px;
+  }
+  .s-btn[value="APR"] + .s-lbl { border-color: var(--green-acc); color: var(--green-acc); }
+  .s-btn[value="REP"] + .s-lbl { border-color: var(--red-acc); color: var(--red-acc); }
+  .s-btn[value="OBS"] + .s-lbl { border-color: var(--amber-acc); color: var(--amber-acc); }
+  .s-btn[value="APR"]:checked + .s-lbl { background: var(--green-acc); color: white; }
+  .s-btn[value="REP"]:checked + .s-lbl { background: var(--red-acc); color: white; }
+  .s-btn[value="OBS"]:checked + .s-lbl { background: var(--amber-acc); color: white; }
+
+  /* ── CYCLE TEST ── */
+  .cycle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cycle-card {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .cycle-head {
+    background: var(--blue-dark);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cycle-head span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: var(--white);
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .cycle-badge {
+    background: rgba(255,255,255,.15);
+    color: var(--white);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .cycle-body { padding: 14px 16px; }
+  .cycle-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .cycle-step:last-child { border-bottom: none; }
+  .cycle-step-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .step-status-btns { display: flex; gap: 4px; }
+  .step-rb { display: none; }
+  .step-lbl {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all .15s;
+  }
+  .step-rb[value="OK"] + .step-lbl { border-color: var(--green-acc); color: var(--green-acc); }
+  .step-rb[value="FALHA"] + .step-lbl { border-color: var(--red-acc); color: var(--red-acc); }
+  .step-rb[value="OK"]:checked + .step-lbl { background: var(--green-acc); color: white; }
+  .step-rb[value="FALHA"]:checked + .step-lbl { background: var(--red-acc); color: white; }
+
+  /* ── SIGNATURE ── */
+  .sig-wrapper {
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    background: var(--gray-100);
+  }
+  canvas#sigCanvas {
+    display: block;
+    margin: 0 auto 10px;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    cursor: crosshair;
+    touch-action: none;
+    max-width: 100%;
+  }
+  .sig-btns { display: flex; gap: 10px; justify-content: center; }
+  .sig-btn {
+    padding: 7px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+  }
+  .sig-btn-clear { background: var(--gray-200); color: var(--gray-600); }
+  .sig-btn-clear:hover { background: var(--gray-400); color: var(--white); }
+  .sig-label-sm { font-size: 11px; color: var(--gray-400); margin-top: 6px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+  }
+  .btn-primary { background: var(--blue-mid); color: var(--white); }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--blue-mid); color: var(--blue-mid); }
+  .btn-outline:hover { background: var(--blue-pale); }
+  .btn-danger { background: var(--red-acc); color: var(--white); }
+  .btn-danger:hover { filter: brightness(.9); }
+  .btn-success { background: var(--green-acc); color: var(--white); }
+  .btn-success:hover { filter: brightness(.9); }
+  .btn-print { background: var(--gray-800); color: var(--white); }
+  .btn-print:hover { background: var(--blue-dark); }
+
+  /* ── ACTIONS BAR ── */
+  .actions-bar {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    margin-top: 24px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--gray-200); margin: 20px 0; }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: var(--blue-pale);
+    border: 1px solid rgba(30,95,168,.2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--blue-dark);
+    margin-bottom: 16px;
+  }
+
+  /* ── EQUIP DATA SHEET ── */
+  .equip-sheet {
+    background: var(--blue-pale);
+    border: 1.5px solid rgba(30,95,168,.2);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+  .equip-sheet h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue-dark);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(30,95,168,.2);
+  }
+
+  /* ── RESPONSIVE: TABLET (max 1024px) ── */
+  @media(max-width:1024px) {
+    .form-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .insp-table { font-size: 13px; }
+    .modal-box { max-width: 90vw; }
+  }
+
+  /* ── RESPONSIVE: MOBILE (max 768px) ── */
+  @media(max-width:768px) {
+    /* Header */
+    .header-inner { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+    .header-logo { height: 40px; }
+    .header-titles h1 { font-size: 14px; }
+    .header-titles p { font-size: 10px; }
+    .header-badge { display: none; }
+
+    /* Status bar */
+    .status-bar { top: 64px; padding: 8px 12px; }
+    .status-bar-inner { flex-wrap: wrap; gap: 8px; }
+    .status-bar-title { width: 100%; }
+    .status-pills { flex-wrap: wrap; gap: 6px; }
+    .pill { font-size: 10px; padding: 3px 8px; }
+
+    /* Main layout */
+    .main { padding: 12px 10px 80px; }
+    .section-body { padding: 14px 12px; }
+
+    /* Form grids — always 1 col on mobile */
+    .form-grid,
+    .form-grid-2,
+    .form-grid-3 { grid-template-columns: 1fr !important; gap: 12px; }
+    .col-span-2,
+    .col-span-3,
+    .col-span-full { grid-column: 1 !important; }
+
+    /* Inspection table — stack layout */
+    .insp-table thead { display: none; }
+    .insp-table, .insp-table tbody,
+    .insp-table tr, .insp-table td { display: block; width: 100%; }
+    .insp-row { border-left: 4px solid var(--gray-200); margin-bottom: 10px;
+                border-radius: 8px; overflow: hidden; padding: 10px 10px 6px; }
+    .insp-row td { padding: 4px 0; border: none; }
+    .item-name { font-size: 13px; margin-bottom: 4px; }
+    .insp-input { font-size: 13px; }
+    .status-btns { flex-direction: row; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .s-lbl { font-size: 11px; padding: 5px 10px; }
+
+    /* Cycle grid */
+    .cycle-grid { grid-template-columns: 1fr; gap: 12px; }
+
+    /* Signature canvas */
+    canvas#sigCanvas { width: 100% !important; height: 120px !important; }
+
+    /* Summary modal */
+    .modal-overlay { padding: 10px; }
+    .modal-box { border-radius: 10px; }
+    .modal-head { padding: 14px 18px; }
+    .modal-head h2 { font-size: 15px; }
+    .modal-body { padding: 16px 18px; max-height: 65vh; }
+    .modal-foot { padding: 12px 18px; flex-wrap: wrap; gap: 8px; }
+    .summary-stat { flex-direction: column; gap: 8px; }
+
+    /* Actions bar */
+    .actions-bar { flex-direction: column; align-items: stretch; padding: 14px 12px; gap: 8px; }
+    .actions-bar .btn { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
+
+    /* Photo area */
+    .photo-thumb { width: 70px; height: 70px; }
+
+    /* Char counters */
+    .char-counter, .insp-counter { font-size: 9px; }
+
+    /* Login box */
+    .login-box { padding: 32px 22px 28px; }
+    .login-logo { height: 52px; }
+    .login-title { font-size: 14px; }
+    .login-field input { font-size: 14px; padding: 12px 40px 12px 14px; }
+    .login-btn { font-size: 14px; padding: 12px; }
+
+    /* Toast */
+    .toast { left: 12px; right: 12px; bottom: 16px; font-size: 12px; padding: 10px 14px; }
+
+    /* Equip sheet */
+    .equip-sheet { padding: 12px 14px; }
+  }
+
+  /* ── RESPONSIVE: SMALL MOBILE (max 400px) ── */
+  @media(max-width:400px) {
+    .header-titles h1 { font-size: 12px; }
+    .section-head { padding: 11px 14px; }
+    .section-title { font-size: 13px; }
+    .btn { font-size: 12px; padding: 9px 14px; }
+    .s-lbl { font-size: 10px; padding: 4px 7px; }
+    .login-box { padding: 28px 16px 22px; }
+  }
+
+  @media print {
+    #loginOverlay, .actions-bar, .photo-area button,
+    .section-head .section-toggle { display: none !important; }
+    .section-body { display: block !important; }
+    .page-header { position: static !important; }
+    .status-bar { display: none !important; }
+    .main { padding: 0; }
+    body { background: white; font-size: 12px; }
+    .section-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 12px; }
+    canvas#sigCanvas { border: 1px solid #ccc; }
+    .form-grid, .form-grid-2, .form-grid-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+    /* Ocultar contadores, toast, info-box e tabela interativa */
+    .char-counter, .insp-counter { display: none !important; }
+    .toast { display: none !important; }
+    .info-box { display: none !important; }
+    #inspTable { display: none !important; }
+    /* Mostrar tabela de impressão gerada por JS */
+    .insp-print-only { display: block !important; }
+    /* Outros campos do formulário */
+    .field input, .field textarea, .field select {
+      border: none !important; background: transparent !important;
+      box-shadow: none !important; padding: 2px 0 !important;
+      color: #000 !important; font-size: 11px !important;
+    }
+    input::placeholder, textarea::placeholder { color: transparent !important; opacity: 0 !important; }
+  }
+
+  /* ── TABELA DE IMPRESSÃO (gerada por JS) ── */
+  .insp-print-only { display: none; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--blue-dark); color: white;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-md);
+    opacity: 0; transform: translateY(10px);
+    transition: all .3s;
+    z-index: 300;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: var(--green-acc); }
+  .toast.error { background: var(--red-acc); }
+
+  /* ── CHAR COUNTER ── */
+  .field-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .char-counter {
+    font-size: 10px;
+    color: var(--gray-400);
+    text-align: right;
+    line-height: 1;
+    transition: color .2s;
+    height: 12px;
+  }
+  .char-counter.warn  { color: var(--amber-acc); font-weight: 600; }
+  .char-counter.limit { color: var(--red-acc);   font-weight: 700; }
+  .field input.at-limit,
+  .field textarea.at-limit,
+  .insp-input.at-limit { border-color: var(--red-acc) !important; background: var(--red-light) !important; }
+  .insp-counter {
+    font-size: 10px;
+    color: var(--gray-400);
+    text-align: right;
+    line-height: 1;
+    margin-top: 2px;
+    transition: color .2s;
+  }
+  .insp-counter.warn  { color: var(--amber-acc); font-weight: 600; }
+  .insp-counter.limit { color: var(--red-acc);   font-weight: 700; }
+
+  /* ── LOGIN SCREEN ── */
+  #loginOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, var(--blue-dark) 0%, #0d1f38 60%, #1a3a6e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 48px 44px 40px;
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+    text-align: center;
+  }
+  .login-logo {
+    height: 64px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  }
+  .login-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .login-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .login-field {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .login-field input {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 13px 44px 13px 16px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    color: var(--white);
+    outline: none;
+    letter-spacing: 2px;
+    transition: border-color .2s, background .2s;
+  }
+  .login-field input::placeholder { color: rgba(255,255,255,0.3); letter-spacing: .5px; font-size: 13px; }
+  .login-field input:focus { border-color: var(--blue-light); background: rgba(255,255,255,0.1); }
+  .login-field input.shake { animation: shake .4s ease; border-color: var(--red-acc) !important; }
+  .login-eye {
+    position: absolute;
+    right: 13px; top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: rgba(255,255,255,0.4);
+    font-size: 16px;
+    user-select: none;
+    transition: color .2s;
+  }
+  .login-eye:hover { color: rgba(255,255,255,0.8); }
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-light));
+    border: none;
+    border-radius: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity .2s, transform .1s;
+    box-shadow: 0 4px 16px rgba(30,95,168,0.4);
+  }
+  .login-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+  .login-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .login-error {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #ff8080;
+    min-height: 18px;
+    font-weight: 600;
+  }
+  .login-attempts {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 8px;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* ── WATERMARK ── */
+  #watermark {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    display: none;
+  }
+  #watermark svg { width: 100%; height: 100%; }
+  body.unlocked #watermark { display: block; }
+  body.unlocked .page-header,
+  body.unlocked .status-bar,
+  body.unlocked .main,
+  body.unlocked .actions-bar { position: relative; z-index: 1; }
+
+  /* ── PRINT: block without auth, show watermark ── */
+  @media print {
+    #loginOverlay { display: none !important; }
+    #watermark { display: block !important; position: fixed !important; opacity: .08 !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN OVERLAY ═══════════════ -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <img src="logoicetar.png" class="login-logo" alt="ICETAR">
+    <p class="login-subtitle">Controle de Qualidade Industrial</p>
+    <p class="login-title">🔒 Acesso Restrito</p>
+    <div class="login-field">
+      <input type="password" id="loginInput" placeholder="Digite a senha de acesso" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      <span class="login-eye" id="eyeToggle" onclick="toggleEye()">👁</span>
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-attempts" id="loginAttempts"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ WATERMARK ═══════════════ -->
+<div id="watermark">
+  <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="wm" x="0" y="0" width="320" height="180" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+        <text x="10" y="60" font-family="Barlow Condensed, sans-serif" font-size="38" font-weight="700"
+              fill="#1a2d4f" opacity="0.07" letter-spacing="6">ICETAR</text>
+        <text x="22" y="95" font-family="Barlow, sans-serif" font-size="10" font-weight="500"
+              fill="#1a2d4f" opacity="0.05" letter-spacing="3">QUALIDADE INDUSTRIAL</text>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#wm)"/>
+  </svg>
+</div>
+
+
+<!-- HEADER -->
+<header class="page-header">
+  <div class="header-inner">
+    <img src="logoicetar.png" class="header-logo" alt="ICETAR">
+    <div class="header-titles">
+      <h1>INDÚSTRIA E COMÉRCIO DE EQUIPAMENTOS DE TRATAMENTO DE AR</h1>
+      <p>Rua Ibituruna, 961 – Parque Imperial, São Paulo – SP &nbsp;|&nbsp; Tel. (11) 5071-2395 &nbsp;|&nbsp; www.icetar.com.br</p>
+    </div>
+  </div>
+</header>
+
+<!-- STATUS BAR -->
+
+<main class="main">
+
+<!-- ─────────────────── SEÇÃO 1 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">1</div>
+    <span class="section-title">Dados Gerais</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="form-grid">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="f-data" required>
+      </div>
+      <div class="field">
+        <label>Número de Série</label>
+        <input type="text" id="f-serie" placeholder="Ex: ICA-2024-001">
+      </div>
+      <div class="field col-span-2">
+        <label>Produto</label>
+        <input type="text" id="f-produto" placeholder="Descrição do produto">
+      </div>
+      <div class="field col-span-2">
+        <label>Destinatário</label>
+        <input type="text" id="f-destinatario" placeholder="Nome / Empresa">
+      </div>
+      <div class="field">
+        <label>Nota Fiscal</label>
+        <input type="text" id="f-nf" placeholder="Número da NF">
+      </div>
+      <div class="field">
+        <label>Ordem de Produção</label>
+        <input type="text" id="f-op" placeholder="Nº da O.P.">
+      </div>
+      <div class="field col-span-full">
+        <label>Transporte</label>
+        <div class="radio-group">
+          <input type="radio" class="radio-btn" name="transporte" id="transp-sim" value="SIM">
+          <label class="radio-label" for="transp-sim">Sim</label>
+          <input type="radio" class="radio-btn" name="transporte" id="transp-nao" value="NAO">
+          <label class="radio-label" for="transp-nao">Não</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 2 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">2</div>
+    <span class="section-title">Dados do Equipamento</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="equip-sheet">
+      <h3>Folha de Dados — Secador por Adsorção Regeneração a Frio</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Capacidade (pcm ou m³/h)</label>
+          <input type="text" id="eq-capacidade" placeholder="Ex: 20-34">
+        </div>
+        <div class="field">
+          <label>Altura (mm)</label>
+          <input type="number" id="eq-altura" placeholder="Ex: 650">
+        </div>
+        <div class="field">
+          <label>Comprimento (mm)</label>
+          <input type="number" id="eq-comprimento" placeholder="Ex: 400">
+        </div>
+        <div class="field">
+          <label>Profundidade (mm)</label>
+          <input type="number" id="eq-profundidade" placeholder="Ex: 400">
+        </div>
+        <div class="field">
+          <label>Peso (kg)</label>
+          <input type="number" id="eq-peso" step="0.1" placeholder="Ex: 35">
+        </div>
+        <div class="field">
+          <label>Tipo de Regeneração</label>
+          <input type="text" id="eq-regeneracao" placeholder="Ex: Ar-frio e seco">
+        </div>
+        <div class="field">
+          <label>Conexão Entrada</label>
+          <input type="text" id="eq-cx-entrada" placeholder="Ex: 1/2&quot; BSP">
+        </div>
+        <div class="field">
+          <label>Conexão Saída</label>
+          <input type="text" id="eq-cx-saida" placeholder='Ex: 1" BSP'>
+        </div>
+        <div class="field">
+          <label>Tensão (V)</label>
+          <input type="text" id="eq-tensao" placeholder="Ex: 220/1">
+        </div>
+        <div class="field">
+          <label>Frequência (Hz)</label>
+          <input type="number" id="eq-freq" placeholder="Ex: 60">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 3 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">3</div>
+    <span class="section-title">Características do Produto Analisadas</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="info-box">💡 Para cada item, informe o valor medido, a observação e selecione a situação: <strong>APR</strong> (Aprovado), <strong>REP</strong> (Reprovado) ou <strong>OBS</strong> (Observação).</div>
+    <div style="overflow-x:auto">
+    <table class="insp-table" id="inspTable">
+      <thead>
+        <tr>
+          <th style="width:28%">Item</th>
+          <th style="width:24%">Valor Medido / Característica</th>
+          <th style="width:30%">Observação</th>
+          <th style="width:18%">Situação</th>
+        </tr>
+      </thead>
+      <tbody id="inspBody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 4 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">4</div>
+    <span class="section-title">Teste de Ciclo da Máquina</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="cycle-grid">
+      <div class="cycle-card">
+        <div class="cycle-head">
+          <span>Ciclo</span>
+          <div class="cycle-badge">A</div>
+        </div>
+        <div class="cycle-body">
+          <div class="cycle-step">
+            <span class="cycle-step-name">🌬️ Secando</span>
+            <div class="step-status-btns">
+              <input type="radio" class="step-rb" name="cicloA-secando" id="cA-sec-ok" value="OK">
+              <label class="step-lbl" for="cA-sec-ok">OK</label>
+              <input type="radio" class="step-rb" name="cicloA-secando" id="cA-sec-fl" value="FALHA">
+              <label class="step-lbl" for="cA-sec-fl">FALHA</label>
+            </div>
+          </div>
+          <div class="cycle-step">
+            <span class="cycle-step-name">♻️ Regenerando</span>
+            <div class="step-status-btns">
+              <input type="radio" class="step-rb" name="cicloA-regenerando" id="cA-reg-ok" value="OK">
+              <label class="step-lbl" for="cA-reg-ok">OK</label>
+              <input type="radio" class="step-rb" name="cicloA-regenerando" id="cA-reg-fl" value="FALHA">
+              <label class="step-lbl" for="cA-reg-fl">FALHA</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cycle-card">
+        <div class="cycle-head">
+          <span>Ciclo</span>
+          <div class="cycle-badge">B</div>
+        </div>
+        <div class="cycle-body">
+          <div class="cycle-step">
+            <span class="cycle-step-name">🌬️ Secando</span>
+            <div class="step-status-btns">
+              <input type="radio" class="step-rb" name="cicloB-secando" id="cB-sec-ok" value="OK">
+              <label class="step-lbl" for="cB-sec-ok">OK</label>
+              <input type="radio" class="step-rb" name="cicloB-secando" id="cB-sec-fl" value="FALHA">
+              <label class="step-lbl" for="cB-sec-fl">FALHA</label>
+            </div>
+          </div>
+          <div class="cycle-step">
+            <span class="cycle-step-name">⏸️ Stand-by</span>
+            <div class="step-status-btns">
+              <input type="radio" class="step-rb" name="cicloB-standby" id="cB-stb-ok" value="OK">
+              <label class="step-lbl" for="cB-stb-ok">OK</label>
+              <input type="radio" class="step-rb" name="cicloB-standby" id="cB-stb-fl" value="FALHA">
+              <label class="step-lbl" for="cB-stb-fl">FALHA</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="field">
+      <label>Registro dos Resultados dos Testes</label>
+      <textarea id="ciclo-resultado" rows="4" placeholder="Descreva os resultados observados durante os testes de ciclo..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 5 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">5</div>
+    <span class="section-title">Observações Gerais</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="form-grid">
+      <div class="field col-span-full">
+        <label>Observações</label>
+        <textarea id="obs-gerais" rows="5" placeholder="Registre aqui quaisquer observações relevantes sobre o equipamento..."></textarea>
+      </div>
+      <div class="field col-span-full">
+        <label>Acompanha Filtro Modelo</label>
+        <input type="text" id="filtro-modelo" placeholder="Informe o modelo do filtro que acompanha o equipamento">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 6 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">6</div>
+    <span class="section-title">Responsáveis</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="form-grid">
+      <div class="field">
+        <label>Data de Saída</label>
+        <input type="date" id="r-data-saida">
+      </div>
+      <div class="field col-span-2">
+        <label>Responsável C.Q.</label>
+        <input type="text" id="r-cq" placeholder="Nome do responsável pelo CQ">
+      </div>
+      <div class="field">
+        <label>Número de Registro</label>
+        <input type="text" id="r-reg" placeholder="Nº do registro">
+      </div>
+      <div class="field col-span-2">
+        <label>Responsável pela Montagem da Produção</label>
+        <input type="text" id="r-mont-prod" placeholder="Nome">
+      </div>
+      <div class="field col-span-2">
+        <label>Responsável pela Montagem Elétrica</label>
+        <input type="text" id="r-mont-elet" placeholder="Nome">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────── SEÇÃO 7 ─────────────────── -->
+<div class="section-card">
+  <div class="section-head" onclick="toggleSection(this)">
+    <div class="section-num">7</div>
+    <span class="section-title">Assinatura Digital – Responsável ICETAR</span>
+    <span class="section-toggle open">▾</span>
+  </div>
+  <div class="section-body open">
+    <div class="sig-wrapper">
+      <canvas id="sigCanvas" width="500" height="160"></canvas>
+      <p class="sig-label-sm">Assine com o mouse ou dedo no campo acima</p>
+      <div style="height:8px"></div>
+      <p style="font-weight:700;color:var(--blue-dark);font-size:13px;margin-bottom:8px">ICETAR — Responsável</p>
+      <div class="sig-btns">
+        <button class="sig-btn sig-btn-clear" onclick="clearSignature()">Limpar Assinatura</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="actions-bar">
+  <button class="btn btn-outline" onclick="clearForm()">🗑 Limpar Tudo</button>
+  <button class="btn btn-success" onclick="savePDF()">⬇ Salvar / Gerar PDF</button>
+</div>
+
+</main>
+
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CHAR COUNTER HELPER ──
+function attachCounter(el, max) {
+  // create wrapper only if field parent is .field
+  const parent = el.parentElement;
+  let counter = parent.querySelector('.char-counter');
+  if (!counter) {
+    counter = document.createElement('div');
+    counter.className = 'char-counter';
+    parent.appendChild(counter);
+  }
+  function update() {
+    const len = el.value.length;
+    counter.textContent = len + '/' + max;
+    el.classList.remove('at-limit');
+    counter.classList.remove('warn','limit');
+    if (len >= max) { el.classList.add('at-limit'); counter.classList.add('limit'); }
+    else if (len >= Math.round(max * 0.8)) { counter.classList.add('warn'); }
+  }
+  el.setAttribute('maxlength', max);
+  el.addEventListener('input', update);
+  update();
+}
+
+function attachInspCounter(input, max) {
+  input.setAttribute('maxlength', max);
+  input.addEventListener('input', () => {
+    if (input.value.length >= max) input.classList.add('at-limit');
+    else input.classList.remove('at-limit');
+  });
+}
+
+// ── INSPECTION ITEMS ──
+const inspItems = [
+  { id: 'altura',      name: 'Altura', unit: 'mm' },
+  { id: 'comprimento', name: 'Comprimento', unit: 'mm' },
+  { id: 'profundidade',name: 'Profundidade', unit: 'mm' },
+  { id: 'conexoes',    name: 'Conexões', unit: 'pol.' },
+  { id: 'capacidade',  name: 'Capacidade', unit: 'pcm ou m³/h' },
+  { id: 'tipoabs',     name: 'Tipo de Absorvedor', unit: '' },
+  { id: 'qtdabs',      name: 'Quantidade de Absorvedor', unit: 'kg' },
+  { id: 'tensao',      name: 'Tensão', unit: 'V' },
+  { id: 'corrente',    name: 'Corrente', unit: 'A' },
+  { id: 'painel',      name: 'Painel de Controle', unit: '' },
+  { id: 'acabamento',  name: 'Acabamento', unit: 'Pintura' },
+  { id: 'etiquetas',   name: 'Etiquetas de Segurança', unit: '' },
+  { id: 'tipoemb',     name: 'Tipo de Embalagem', unit: '' },
+  { id: 'dimemb',      name: 'Dimensões da Embalagem', unit: 'mm' },
+  { id: 'testebob',    name: 'Teste das Bobinas', unit: '' },
+  { id: 'testeciclo',  name: 'Teste de Ciclo da Máquina', unit: '' },
+  { id: 'testeval',    name: 'Teste das Válvulas de Retenção', unit: '' },
+  { id: 'testevaz',    name: 'Teste de Vazamento no Secador', unit: '' },
+  { id: 'tempoprog',   name: 'Tempo de Programação de Saída do Secador', unit: '' },
+];
+
+// ── BUILD TABLE ──
+function buildInspTable() {
+  const tbody = document.getElementById('inspBody');
+  inspItems.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.className = 'insp-row';
+    tr.dataset.id = item.id;
+    tr.innerHTML = `
+      <td class="item-name">${item.name}<small>${item.unit}</small></td>
+      <td><input class="insp-input" type="text" placeholder="Valor / Característica" data-field="val" oninput="updateProgress()"><div class="insp-pv"></div></td>
+      <td><input class="insp-input" type="text" placeholder="Observação" data-field="obs"><div class="insp-pv"></div></td>
+      <td>
+        <div class="status-btns">
+          <input type="radio" class="s-btn" name="status-${item.id}" id="apr-${item.id}" value="APR">
+          <label class="s-lbl" for="apr-${item.id}">APR</label>
+          <input type="radio" class="s-btn" name="status-${item.id}" id="rep-${item.id}" value="REP">
+          <label class="s-lbl" for="rep-${item.id}">REP</label>
+          <input type="radio" class="s-btn" name="status-${item.id}" id="obs-${item.id}" value="OBS">
+          <label class="s-lbl" for="obs-${item.id}">OBS</label>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+    // status change listener
+    tr.querySelectorAll('.s-btn').forEach(rb => {
+      rb.addEventListener('change', () => {
+        tr.classList.remove('status-apr','status-rep','status-obs');
+        if(rb.value==='APR') tr.classList.add('status-apr');
+        if(rb.value==='REP') tr.classList.add('status-rep');
+        if(rb.value==='OBS') tr.classList.add('status-obs');
+        updateProgress();
+      });
+    });
+  });
+}
+
+// ── TOGGLE SECTION ──
+function toggleSection(head) {
+  const body = head.nextElementSibling;
+  const toggle = head.querySelector('.section-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+// ── STATUS COUNTS ──
+function updateProgress() {}
+
+// ── SIGNATURE ──
+const canvas = document.getElementById('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false, hasSig = false;
+ctx.strokeStyle = '#1a2d4f';
+ctx.lineWidth = 2;
+ctx.lineCap = 'round';
+function getPos(e, c) {
+  const r = c.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - r.left, y: src.clientY - r.top };
+}
+canvas.addEventListener('mousedown', e => { drawing=true; const p=getPos(e,canvas); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e,canvas); ctx.lineTo(p.x,p.y); ctx.stroke(); hasSig=true; });
+canvas.addEventListener('mouseup', () => drawing=false);
+canvas.addEventListener('mouseleave', () => drawing=false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=getPos(e,canvas); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if(!drawing) return; const p=getPos(e,canvas); ctx.lineTo(p.x,p.y); ctx.stroke(); hasSig=true; });
+canvas.addEventListener('touchend', () => drawing=false);
+function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); hasSig=false; }
+
+
+
+
+
+// ── SAVE PDF (print dialog) ──
+function savePDF() {
+  const dest = (document.getElementById('f-destinatario').value || 'Destinatario').trim();
+  const nf   = (document.getElementById('f-nf').value || 'NF').trim();
+  const sanitize = s => s.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_');
+  const filename = sanitize(dest) + '_' + sanitize(nf);
+  const prevTitle = document.title;
+  document.title = filename;
+  showToast('Gerando PDF: ' + filename + '.pdf', 'success');
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { document.title = prevTitle; }, 2000);
+  }, 400);
+}
+
+// ── CLEAR FORM ──
+function clearForm() {
+  if(!confirm('Tem certeza que deseja limpar todos os campos?')) return;
+  document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(el => el.value='');
+  document.querySelectorAll('input[type="radio"]').forEach(el => el.checked=false);
+  document.querySelectorAll('.insp-row').forEach(tr => tr.classList.remove('status-apr','status-rep','status-obs'));
+  clearSignature();
+  photos.splice(0);
+  renderPhotos();
+  updateProgress();
+  showToast('Formulário limpo.', '');
+}
+
+// ── TOAST ──
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+
+
+// ── INIT ──
+buildInspTable();
+document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
+
+// ── CICLO OK/FALHA: força atualização visual via JS ──
+document.querySelectorAll('.step-rb').forEach(function(rb) {
+  rb.addEventListener('change', function() {
+    var name = this.name;
+    document.querySelectorAll('.step-rb[name="' + name + '"]').forEach(function(r) {
+      var lbl = r.nextElementSibling;
+      if (!lbl) return;
+      lbl.style.background = '';
+      lbl.style.color = '';
+      if (r.checked) {
+        if (r.value === 'OK')    { lbl.style.background = '#1e7e4e'; lbl.style.color = '#fff'; }
+        if (r.value === 'FALHA') { lbl.style.background = '#c0392b'; lbl.style.color = '#fff'; }
+      } else {
+        if (r.value === 'OK')    lbl.style.color = '#1e7e4e';
+        if (r.value === 'FALHA') lbl.style.color = '#c0392b';
+      }
+    });
+  });
+});
+
+// ── APPLY CHAR COUNTERS ──
+(function applyCounters() {
+  const limits = {
+    // Dados Gerais
+    'f-serie':        20,
+    'f-produto':      60,
+    'f-destinatario': 60,
+    'f-nf':           15,
+    'f-op':           20,
+    // Dados do Equipamento
+    'eq-capacidade':  10,
+    'eq-regeneracao': 20,
+    'eq-cx-entrada':  15,
+    'eq-cx-saida':    15,
+    'eq-tensao':       5,
+    // Responsáveis
+    'r-cq':           30,
+    'r-reg':          20,
+    'r-mont-prod':    40,
+    'r-mont-elet':    40,
+    // Outros
+    'ciclo-resultado':500,
+    'obs-gerais':     500,
+    'filtro-modelo':   60,
+  };
+  Object.entries(limits).forEach(([id, max]) => {
+    const el = document.getElementById(id);
+    if (el) attachCounter(el, max);
+  });
+  // Campos numéricos do equipamento com limites individuais
+  const numLimits = {
+    'eq-altura':       10,
+    'eq-comprimento':  10,
+    'eq-profundidade': 10,
+    'eq-peso':         10,
+    'eq-freq':         15,
+  };
+  Object.entries(numLimits).forEach(([id, max]) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('maxlength', max);
+  });
+  // Tabela de inspeção – val:60, obs:120
+  document.querySelectorAll('#inspBody .insp-input').forEach(inp => {
+    const field = inp.getAttribute('data-field');
+    const max = field === 'obs' ? 120 : 60;
+    attachInspCounter(inp, max);
+  });
+})();
+
+document.querySelectorAll('input, textarea, select').forEach(el => {
+  el.addEventListener('input', updateProgress);
+  el.addEventListener('change', updateProgress);
+});
+updateProgress();
+
+// ── LOGIN / AUTH ──
+const HASH = '4d4799a7f81fff35879cc6564466f72fe9442d76c5c6c7ca784e27196dfe846c';
+let attempts = 0;
+const MAX_ATT = 3;
+const LOCK_MS = 30000;
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const input = document.getElementById('loginInput');
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('loginError');
+  const att   = document.getElementById('loginAttempts');
+
+  if (btn.disabled) return;
+  const val = input.value.trim();
+  if (!val) { err.textContent = 'Digite a senha.'; return; }
+
+  const h = await sha256(val);
+  if (h === HASH) {
+    document.getElementById('loginOverlay').style.transition = 'opacity .5s';
+    document.getElementById('loginOverlay').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.body.classList.add('unlocked');
+    }, 500);
+  } else {
+    attempts++;
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+    input.value = '';
+    const left = MAX_ATT - attempts;
+    if (attempts >= MAX_ATT) {
+      err.textContent = 'Acesso bloqueado por 30 segundos.';
+      att.textContent = '';
+      btn.disabled = true;
+      input.disabled = true;
+      let remaining = 30;
+      const interval = setInterval(() => {
+        remaining--;
+        err.textContent = `Aguarde ${remaining}s para tentar novamente.`;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          attempts = 0;
+          btn.disabled = false;
+          input.disabled = false;
+          err.textContent = '';
+          att.textContent = '';
+          input.focus();
+        }
+      }, 1000);
+    } else {
+      err.textContent = 'Senha incorreta.';
+      att.textContent = `${left} tentativa${left>1?'s':''} restante${left>1?'s':''}.`;
+    }
+  }
+}
+
+function toggleEye() {
+  const inp = document.getElementById('loginInput');
+  const eye = document.getElementById('eyeToggle');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁'; }
+}
+
+// ── PRINT ──
+let _inspPrintEl = null;
+
+function _esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function _buildInspPrintTable() {
+  const wrap = document.createElement('div');
+  wrap.className = 'insp-print-only';
+  let html = '<table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;">' +
+    '<thead><tr style="background:#f4f6fa;">' +
+    '<th style="width:28%;padding:6px 8px;border:1px solid #ccc;text-align:left;text-transform:uppercase;font-size:10px;">Item</th>' +
+    '<th style="width:24%;padding:6px 8px;border:1px solid #ccc;text-align:left;text-transform:uppercase;font-size:10px;">Valor Medido / Característica</th>' +
+    '<th style="width:30%;padding:6px 8px;border:1px solid #ccc;text-align:left;text-transform:uppercase;font-size:10px;">Observação</th>' +
+    '<th style="width:18%;padding:6px 8px;border:1px solid #ccc;text-align:left;text-transform:uppercase;font-size:10px;">Situação</th>' +
+    '</tr></thead><tbody>';
+
+  document.querySelectorAll('#inspBody .insp-row').forEach(function(tr) {
+    var nameEl  = tr.querySelector('.item-name');
+    var inputs  = tr.querySelectorAll('.insp-input');
+    var checked = tr.querySelector('.s-btn:checked');
+    var name    = nameEl ? nameEl.innerText.replace(/\n/g,' ').trim() : '';
+    var val     = inputs[0] ? inputs[0].value : '';
+    var obs     = inputs[1] ? inputs[1].value : '';
+    var status  = checked  ? checked.value : '';
+    var bg = status==='APR' ? '#e8f8ef' : status==='REP' ? '#fdecea' : status==='OBS' ? '#fff8e1' : '#fff';
+    var sc = status==='APR' ? 'color:#1e7e4e;font-weight:700' : status==='REP' ? 'color:#c0392b;font-weight:700' : status==='OBS' ? 'color:#d97706;font-weight:700' : '';
+    html += '<tr style="background:' + bg + ';">' +
+      '<td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;font-weight:600;">' + _esc(name) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;">' + _esc(val) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;">' + _esc(obs) + '</td>' +
+      '<td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;' + sc + '">' + _esc(status) + '</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  return wrap;
+}
+
+window.addEventListener('beforeprint', function(e) {
+  if (!document.body.classList.contains('unlocked')) {
+    e.preventDefault ? e.preventDefault() : (e.returnValue = false);
+    showToast('Faça login para imprimir.', 'error');
+    setTimeout(() => window.stop && window.stop(), 50);
+    return;
+  }
+  // Gera tabela de impressão com valores como texto puro
+  _inspPrintEl = _buildInspPrintTable();
+  var tbl = document.getElementById('inspTable');
+  tbl.parentNode.insertBefore(_inspPrintEl, tbl);
+  // Sincroniza value attribute dos outros campos
+  document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(function(el) {
+    if (!el.closest('#inspBody')) el.setAttribute('value', el.value);
+  });
+});
+
+window.addEventListener('afterprint', function() {
+  if (_inspPrintEl) { _inspPrintEl.remove(); _inspPrintEl = null; }
+});
+
+window.addEventListener('load', function() {
+  var inp = document.getElementById('loginInput');
+  if (inp) setTimeout(function(){ inp.focus(); }, 300);
+});
+
+</script>
+</body>
+</html>
