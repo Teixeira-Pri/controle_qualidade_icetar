@@ -747,10 +747,17 @@
   body.unlocked .main,
   body.unlocked .actions-bar { position: relative; z-index: 1; }
 
-  /* ── PRINT: block without auth, show watermark ── */
+  /* ── PRINT: show watermark on every page ── */
   @media print {
     #loginOverlay { display: none !important; }
-    #watermark { display: block !important; position: fixed !important; opacity: .12 !important; }
+    #watermark {
+      display: block !important;
+      position: fixed !important;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important; height: 100% !important;
+      z-index: 9999 !important;
+      opacity: 1 !important;
+    }
   }
 </style>
 </head>
@@ -774,16 +781,18 @@
 
 <!-- ═══════════════ WATERMARK ═══════════════ -->
 <div id="watermark">
-  <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <pattern id="wm" x="0" y="0" width="320" height="180" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
-        <text x="10" y="60" font-family="Barlow Condensed, sans-serif" font-size="38" font-weight="700"
-              fill="#1a2d4f" opacity="0.12" letter-spacing="6">ICETAR</text>
-        <text x="22" y="95" font-family="Barlow, sans-serif" font-size="10" font-weight="500"
-              fill="#1a2d4f" opacity="0.09" letter-spacing="3">QUALIDADE INDUSTRIAL</text>
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#wm)"/>
+  <svg viewBox="0 0 600 850" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+    <text
+      x="300" y="425"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      font-family="Barlow Condensed, sans-serif"
+      font-size="130"
+      font-weight="700"
+      fill="#1a2d4f"
+      opacity="0.10"
+      letter-spacing="18"
+      transform="rotate(-35, 300, 425)">ICETAR</text>
   </svg>
 </div>
 
