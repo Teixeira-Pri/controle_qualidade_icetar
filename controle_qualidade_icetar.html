@@ -421,6 +421,63 @@
     margin-top: 24px;
   }
 
+  /* ── MODAL (Rascunhos) ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,45,79,.55);
+    align-items: center; justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    width: 100%; max-width: 560px;
+    max-height: 80vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--blue-dark);
+  }
+  .modal-head h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--white);
+  }
+  .modal-close {
+    background: none; border: none; color: var(--white);
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 4px;
+  }
+  .modal-body { padding: 18px 20px; overflow-y: auto; }
+  .modal-foot {
+    padding: 14px 20px; border-top: 1px solid var(--gray-200);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  /* ── DRAFT LIST ── */
+  .draft-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+  .draft-item:last-child { margin-bottom: 0; }
+  .draft-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .draft-info strong { font-size: 14px; color: var(--blue-dark); }
+  .draft-info small { font-size: 12px; color: var(--gray-600); }
+  .draft-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .draft-actions .btn { padding: 7px 12px; font-size: 12px; }
+  .draft-empty { text-align: center; color: var(--gray-600); padding: 30px 0; font-size: 13px; }
+
   /* ── DIVIDER ── */
   .divider { height: 1px; background: var(--gray-200); margin: 20px 0; }
 
@@ -552,7 +609,7 @@
   }
 
   @media print {
-    #loginOverlay, .actions-bar, .photo-area button,
+    #loginOverlay, .actions-bar, .modal-overlay, .photo-area button,
     .section-head .section-toggle { display: none !important; }
     .section-body { display: block !important; }
     .page-header { position: static !important; }
@@ -1150,8 +1207,24 @@
 
 <!-- ACTIONS -->
 <div class="actions-bar">
+  <button class="btn btn-outline" onclick="openDrafts()">📂 Meus Relatórios</button>
+  <button class="btn btn-outline" onclick="saveDraft()">💾 Salvar Rascunho</button>
   <button class="btn btn-outline" onclick="clearForm()">🗑 Limpar Tudo</button>
   <button class="btn btn-success" onclick="savePDF()">⬇ Salvar / Gerar PDF</button>
+</div>
+
+<!-- ═══════════════ MODAL: MEUS RELATÓRIOS (RASCUNHOS) ═══════════════ -->
+<div class="modal-overlay" id="draftsModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>📂 Meus Relatórios (Rascunhos)</h2>
+      <button class="modal-close" onclick="closeDrafts()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="draftsList"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeDrafts()">Fechar</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -1305,14 +1378,159 @@ function savePDF() {
 // ── CLEAR FORM ──
 function clearForm() {
   if(!confirm('Tem certeza que deseja limpar todos os campos?')) return;
+  currentDraftId = null;
   document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(el => el.value='');
   document.querySelectorAll('input[type="radio"]').forEach(el => el.checked=false);
+  document.querySelectorAll('.step-rb').forEach(rb => {
+    var lbl = rb.nextElementSibling;
+    if (lbl) { lbl.style.background = ''; lbl.style.color = ''; }
+  });
   document.querySelectorAll('.insp-row').forEach(tr => tr.classList.remove('status-apr','status-rep','status-obs'));
   clearSignature();
-  photos.splice(0);
-  renderPhotos();
   updateProgress();
   showToast('Formulário limpo.', '');
+}
+
+// ── RASCUNHOS (salvar / editar / excluir relatórios em andamento) ──
+const DRAFTS_KEY = 'icetar_rascunhos';
+let currentDraftId = null;
+
+function getDrafts() {
+  try { return JSON.parse(localStorage.getItem(DRAFTS_KEY)) || []; }
+  catch (e) { return []; }
+}
+
+function setDrafts(drafts) {
+  localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+}
+
+function serializeForm() {
+  const data = { fields: {}, radios: {}, insp: {}, signature: null };
+  document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(el => {
+    if (el.id) data.fields[el.id] = el.value;
+  });
+  document.querySelectorAll('input[type="radio"]:checked:not(.s-btn)').forEach(el => {
+    data.radios[el.name] = el.value;
+  });
+  document.querySelectorAll('#inspBody .insp-row').forEach(tr => {
+    const inputs = tr.querySelectorAll('.insp-input');
+    const checked = tr.querySelector('.s-btn:checked');
+    data.insp[tr.dataset.id] = {
+      val: inputs[0] ? inputs[0].value : '',
+      obs: inputs[1] ? inputs[1].value : '',
+      status: checked ? checked.value : ''
+    };
+  });
+  if (hasSig) data.signature = canvas.toDataURL();
+  return data;
+}
+
+function applyFormData(data) {
+  Object.entries(data.fields || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) { el.value = val; el.dispatchEvent(new Event('input')); }
+  });
+  Object.entries(data.radios || {}).forEach(([name, val]) => {
+    const el = document.querySelector('input[name="' + CSS.escape(name) + '"][value="' + CSS.escape(val) + '"]');
+    if (el) { el.checked = true; el.dispatchEvent(new Event('change')); }
+  });
+  document.querySelectorAll('#inspBody .insp-row').forEach(tr => {
+    const item = (data.insp || {})[tr.dataset.id];
+    if (!item) return;
+    const inputs = tr.querySelectorAll('.insp-input');
+    if (inputs[0]) { inputs[0].value = item.val || ''; inputs[0].dispatchEvent(new Event('input')); }
+    if (inputs[1]) inputs[1].value = item.obs || '';
+    if (item.status) {
+      const rb = tr.querySelector('.s-btn[value="' + item.status + '"]');
+      if (rb) { rb.checked = true; rb.dispatchEvent(new Event('change')); }
+    }
+  });
+  clearSignature();
+  if (data.signature) {
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img, 0, 0); hasSig = true; };
+    img.src = data.signature;
+  }
+}
+
+function draftMeta() {
+  const dest = document.getElementById('f-destinatario').value.trim();
+  const nf   = document.getElementById('f-nf').value.trim();
+  let label = dest || 'Sem destinatário';
+  if (nf) label += ' — NF ' + nf;
+  return { label, data: document.getElementById('f-data').value };
+}
+
+function saveDraft() {
+  const drafts = getDrafts();
+  const { label, data } = draftMeta();
+  const formData = serializeForm();
+  const updatedAt = new Date().toISOString();
+  const idx = currentDraftId ? drafts.findIndex(d => d.id === currentDraftId) : -1;
+  if (idx >= 0) {
+    drafts[idx] = { ...drafts[idx], label, data, updatedAt, formData };
+    showToast('Rascunho atualizado.', 'success');
+  } else {
+    currentDraftId = 'r' + Date.now();
+    drafts.unshift({ id: currentDraftId, label, data, updatedAt, formData });
+    showToast('Rascunho salvo.', 'success');
+  }
+  setDrafts(drafts);
+}
+
+function openDrafts() {
+  renderDrafts();
+  document.getElementById('draftsModal').classList.add('show');
+}
+
+function closeDrafts() {
+  document.getElementById('draftsModal').classList.remove('show');
+}
+
+function renderDrafts() {
+  const list = document.getElementById('draftsList');
+  const drafts = getDrafts();
+  if (!drafts.length) {
+    list.innerHTML = '<div class="draft-empty">Nenhum rascunho salvo ainda.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  drafts.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'draft-item';
+    const dt = d.updatedAt ? new Date(d.updatedAt).toLocaleString('pt-BR') : '';
+    const dataFmt = d.data ? d.data.split('-').reverse().join('/') + ' · ' : '';
+    div.innerHTML =
+      '<div class="draft-info">' +
+        '<strong>' + _esc(d.label) + '</strong>' +
+        '<small>' + dataFmt + 'Salvo em ' + dt + '</small>' +
+      '</div>' +
+      '<div class="draft-actions">' +
+        '<button class="btn btn-outline">✏ Editar</button>' +
+        '<button class="btn btn-danger">🗑 Excluir</button>' +
+      '</div>';
+    div.querySelector('.btn-outline').addEventListener('click', () => loadDraft(d.id));
+    div.querySelector('.btn-danger').addEventListener('click', () => deleteDraft(d.id));
+    list.appendChild(div);
+  });
+}
+
+function loadDraft(id) {
+  const draft = getDrafts().find(d => d.id === id);
+  if (!draft) return;
+  applyFormData(draft.formData);
+  currentDraftId = id;
+  closeDrafts();
+  showToast('Rascunho carregado: ' + draft.label, 'success');
+}
+
+function deleteDraft(id) {
+  if (!confirm('Excluir este rascunho? Esta ação não pode ser desfeita.')) return;
+  const drafts = getDrafts().filter(d => d.id !== id);
+  setDrafts(drafts);
+  if (currentDraftId === id) currentDraftId = null;
+  renderDrafts();
+  showToast('Rascunho excluído.', '');
 }
 
 // ── TOAST ──
