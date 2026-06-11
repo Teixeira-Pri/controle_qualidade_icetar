@@ -1628,6 +1628,53 @@ let attempts = 0;
 const MAX_ATT = 3;
 const LOCK_MS = 30000;
 
+// ── SESSÃO: mantém acesso liberado até fechar a aba ou 3h sem uso ──
+const SESSION_KEY = 'icetar_session_unlocked';
+const SESSION_MAX_MS = 3 * 60 * 60 * 1000; // 3 horas
+
+function markSessionActive() {
+  try { sessionStorage.setItem(SESSION_KEY, String(Date.now())); } catch(e) {}
+}
+
+function isSessionValid() {
+  try {
+    const ts = sessionStorage.getItem(SESSION_KEY);
+    if (!ts) return false;
+    return (Date.now() - Number(ts)) < SESSION_MAX_MS;
+  } catch (e) { return false; }
+}
+
+function lockSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+  document.body.classList.remove('unlocked');
+  const overlay = document.getElementById('loginOverlay');
+  overlay.style.transition = '';
+  overlay.style.opacity = '1';
+  overlay.style.display = 'flex';
+}
+
+if (isSessionValid()) {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.body.classList.add('unlocked');
+  markSessionActive();
+} else {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+// Mantém a sessão "viva" enquanto o usuário interage com a página
+['click','input','keydown'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (document.body.classList.contains('unlocked')) markSessionActive();
+  }, { passive: true });
+});
+
+// Verifica periodicamente se passou de 3h sem uso, mesmo sem recarregar a página
+setInterval(() => {
+  if (document.body.classList.contains('unlocked') && !isSessionValid()) {
+    lockSession();
+  }
+}, 60000);
+
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -1645,6 +1692,7 @@ async function doLogin() {
 
   const h = await sha256(val);
   if (h === HASH) {
+    markSessionActive();
     document.getElementById('loginOverlay').style.transition = 'opacity .5s';
     document.getElementById('loginOverlay').style.opacity = '0';
     setTimeout(() => {
@@ -1753,6 +1801,7 @@ window.addEventListener('afterprint', function() {
 });
 
 window.addEventListener('load', function() {
+  if (document.body.classList.contains('unlocked')) return;
   var inp = document.getElementById('loginInput');
   if (inp) setTimeout(function(){ inp.focus(); }, 300);
 });
